@@ -2,6 +2,10 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pix_flutter/main.dart';
+import 'package:provider/provider.dart';
+
+GlobalKey<_ImagePickerPageState> imagePickerKey = GlobalKey();
 
 class ImagePickerPage extends StatefulWidget {
   const ImagePickerPage({Key? key}) : super(key: key);
@@ -12,18 +16,24 @@ class ImagePickerPage extends StatefulWidget {
 
 class _ImagePickerPageState extends State<ImagePickerPage> {
   final ImagePicker _picker = ImagePicker();
+  // final counter = Provider.of<CountNotifier>(context);
   // 选择的照片
-  XFile? _image;
+  // XFile? _image;
+  List<XFile>? _imageFileList;
 
-  // 相册选择
-  Future _getImageFromStorage() async {
+  // 相册选择，多选
+  Future getImageFromStorage() async {
     try {
-      XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-      _uploadImage(image);
+      // XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      final imageFileList = await _picker.pickMultiImage();
+      context.read<ImageFileListNotifier>().setImageFileList(imageFileList);
+      // _uploadImage(image);
       setState(() {
-        _image = image;
+        // _image = image;
+        _imageFileList = imageFileList;
       });
-      print(_image);
+      print(_imageFileList);
+      // print(_image);
     } catch (e) {
       print(e);
     }
@@ -52,7 +62,21 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    getImageFromStorage();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    List<Widget>? imageFileListRendered = _imageFileList?.map((_image) {
+      return Container(
+        child: Image.file(
+          File(_image.path),
+          fit: BoxFit.cover,
+        ),
+      );
+    }).toList();
     return Scaffold(
       appBar: AppBar(title: Text('选择图片')),
       body: Container(
@@ -60,16 +84,11 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
           children: <Widget>[
             ElevatedButton(
               onPressed: () {
-                _getImageFromStorage();
+                getImageFromStorage();
               },
               child: Text('本地图片'),
             ),
-            (_image != null && _image?.path != null)
-                ? Image.file(
-                    File(_image?.path ?? ''),
-                    fit: BoxFit.cover,
-                  )
-                : Text("no image selected")
+            ...?imageFileListRendered,
           ],
         ),
       ),
