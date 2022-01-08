@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -17,22 +17,38 @@ class _ImagePickerPageState extends State<ImagePickerPage> {
 
   // 相册选择
   Future _getImageFromStorage() async {
-    print('执行到了这里???');
-    print(_picker);
     try {
       XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      _uploadImage(image);
       setState(() {
         _image = image;
-        print('执行到了这里???????');
       });
-      print('执行到了这里');
       print(_image);
     } catch (e) {
-      print('sdfsdf');
       print(e);
     }
+  }
 
-    print('执行到了这里???????');
+  Future _uploadImage(XFile? image) async {
+    String path = image?.path ?? 'undefined_path';
+    String name = path.substring(path.lastIndexOf("/") + 1, path.length);
+
+    FormData formData = FormData.fromMap({
+      'name': 'img',
+      'file': await MultipartFile.fromFile(path, filename: name),
+    });
+
+    Dio dio = new Dio();
+    try {
+      Response<String> response =
+          await dio.post<String>('/upload', data: formData);
+
+      if (response.statusCode == 200) {
+        print('上传成功');
+      }
+    } catch (e) {
+      print('上传失败');
+    }
   }
 
   @override
