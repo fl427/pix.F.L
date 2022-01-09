@@ -2,14 +2,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:pix_flutter/common/provider/image_list_provider.dart';
 import 'package:provider/src/provider.dart';
 
 // 图片瀑布流
 class ImagePage extends StatefulWidget {
-  const ImagePage({Key? key, required this.content}) : super(key: key);
-  final String content;
+  const ImagePage({Key? key}) : super(key: key);
   @override
   _ImagePageState createState() => _ImagePageState();
 }
@@ -30,8 +30,29 @@ class _ImagePageState extends State<ImagePage> {
       );
     }).toList();
 
-    return ListView(
-      children: [...?imageFileListRendered],
+    return GridView.custom(
+      gridDelegate: SliverQuiltedGridDelegate(
+        crossAxisCount: 4,
+        mainAxisSpacing: 4,
+        crossAxisSpacing: 4,
+        repeatPattern: QuiltedGridRepeatPattern.inverted,
+        pattern: [
+          QuiltedGridTile(2, 2),
+          QuiltedGridTile(1, 1),
+          QuiltedGridTile(1, 1),
+          QuiltedGridTile(1, 2),
+        ],
+      ),
+      childrenDelegate: SliverChildBuilderDelegate(
+        (context, index) {
+          if (imageFileListRendered == null) {
+            return SizedBox.shrink();
+          }
+          return imageFileListRendered[index];
+        },
+        childCount:
+            imageFileListRendered == null ? 1 : imageFileListRendered.length,
+      ),
     );
   }
 

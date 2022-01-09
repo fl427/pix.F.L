@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pix_flutter/common/provider/image_list_provider.dart';
 import 'package:pix_flutter/main.dart';
 import 'package:provider/provider.dart';
 

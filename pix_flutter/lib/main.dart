@@ -121,11 +121,9 @@ class _HomePageState extends State<HomePage>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: tabs.map((tab) {
+        children: tabs.map((_) {
           return KeepAliveWrapper(
-            child: ImagePage(
-              content: tab,
-            ),
+            child: ImagePage(),
           );
         }).toList(),
       ),
